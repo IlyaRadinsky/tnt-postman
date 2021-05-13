@@ -1,13 +1,25 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8"></meta>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"></meta>
-<title>Hello, static files</title>
+    <title>TNT Viewer</title>
+    <link
+        rel="stylesheet"
+        href="/static/libs/webix.min.css"
+        type="text/css"
+    />
+    <script
+        src="/static/libs/webix.min.js"
+        type="text/javascript"
+    ></script>
 </head>
 <body>
-    <div>
-        <img src="/picture.jpg" style="width: 100%;" />
-    </div>
+    <script type="text/javascript" charset="utf-8">
+        webix.ui({
+        rows:[
+            { view:"template", type:"header", template:"TNT Viewer" },
+            { view:"datatable", autoConfig:true, data:[ /*data array*/ ] }
+        ]
+        });
+    </script>
 </body>
 </html>
