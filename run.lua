@@ -6,6 +6,7 @@ local log = require('log')
 local fio = require('fio')
 local json = require('json')
 local checks = require('checks')
+local utils = require('utils')
 local api = require('api').new()
 
 local WORKDIR = fio.abspath(fio.dirname(arg[0]))
@@ -32,10 +33,10 @@ local http_router = require('http.router')
 local HOST = '127.0.0.1'
 local PORT = 8089
 
-local function json_response(obj)
-    checks('table')
+local function json_response(status, obj)
+    checks('number', 'table')
     return {
-        status = 200,
+        status = status,
         headers = {['content-type'] = "application/json; charset=utf-8"},
         body = json.encode(obj),
     }
@@ -46,13 +47,41 @@ local function on_get_index(req)
 end
 
 local function on_post_connection(req)
-    api.connect()
-    return json_response({ ok = true })
+    local host = req:post_param('host')
+    local port = req:post_param('port')
+    local user = req:post_param('user')
+    local password = req:post_param('password')
+
+    if not utils.not_empty_string(host) then
+        return json_response(400, { error = 'Invalid host' })
+    end
+
+    if not utils.positive_number(port) then
+        return json_response(400, { error = 'Invalid port' })
+    end
+
+    if not utils.not_empty_string(user) or not utils.not_empty_string(password) then
+        user = nil
+        password = nil
+    end
+
+    ok, err = api.connect(host, port, user, password)
+
+    if not ok then
+        return json_response(400, { error = err })
+    end
+
+    return json_response(200, {})
 end
 
 local function on_delete_connection(req)
-    api.disconnect()
-    return json_response({ ok = true })
+    ok, err = api.disconnect()
+
+    if not ok then
+        return json_response(400, { error = err })
+    end
+
+    return json_response(200, {})
 end
 
 local server = http_server.new(HOST, PORT)
