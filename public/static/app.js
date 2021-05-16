@@ -44,10 +44,9 @@ function save() {
 
 function add_new_query() {
     $$("list1").add({
-        title: "New title",
-        year: 2000,
-        rating: 5,
-        votes: 1000
+        title: "localhost:3301",
+        host: "localhost:3301",
+        type: "Eval"
     }, 0);
 };
 
@@ -66,12 +65,12 @@ function open_new_tab(id) {
                 },
                 {
                     cols: [
-                        { view: "combo", options: ["Eval", "Call"], value: "Eval", width: 100, id: "type:" + item.id },
-                        { view: "text", placeholder: "host", id: "host:" + item.id },
+                        { view: "combo", options: ["Eval", "Call"], value: item.type, width: 100, id: "type:" + item.id },
+                        { view: "text", placeholder: "host", value: item.host, id: "host:" + item.id },
                         { view: "button", value: "Send", id: "send:" + item.id, css: "webix_primary", width: 100, click: send },
                     ],
                 },
-                { view: "textarea", placeholder: "query", id: "query:" + item.id },
+                { view: "textarea", placeholder: "Query", value: item.query, id: "query:" + item.id },
             ],
         });
 
@@ -109,9 +108,7 @@ webix.ui({
                     view: "list", id: "list1",
                     template: "#title#",
                     width: 250,
-                    data: [
-                        { id: 1, title: "The Shawshank Redemption", year: 1994, votes: 678790, rating: 9.2, rank: 1 },
-                    ],
+                    data: [],
                     select: true,
                     on: {
                         onItemClick: open_new_tab
@@ -139,7 +136,7 @@ webix.ui({
                                 }
                             ]
                         },
-                        { view: "template", template: "Content", role: "placeholder" },
+                        { view: "template", template: "Response", role: "placeholder" },
                     ],
                 },
             ],
