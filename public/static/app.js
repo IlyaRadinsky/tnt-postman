@@ -45,7 +45,8 @@ function save() {
 function add_new_query() {
     $$("list1").add({
         title: "localhost:3301",
-        host: "localhost:3301",
+        host: "localhost",
+        port: 3301,
         type: "Eval"
     }, 0);
 };
@@ -66,7 +67,10 @@ function open_new_tab(id) {
                 {
                     cols: [
                         { view: "combo", options: ["Eval", "Call"], value: item.type, width: 100, id: "type:" + item.id },
-                        { view: "text", placeholder: "host", value: item.host, id: "host:" + item.id },
+                        { view: "text", placeholder: "Host", value: item.host, id: "host:" + item.id },
+                        { view: "text", placeholder: "Port", value: item.port, id: "port:" + item.id, type: "number", width: 100 },
+                        { view: "text", placeholder: "User", value: item.user, id: "user:" + item.id, width: 100 },
+                        { view: "text", placeholder: "Password", value: item.password, id: "password", type: "password", width: 100 },
                         { view: "button", value: "Send", id: "send:" + item.id, css: "webix_primary", width: 100, click: send },
                     ],
                 },
