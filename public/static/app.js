@@ -1,3 +1,20 @@
+function on_change_item(val) {
+    const parsedId = this.data.id.split(":");
+    const name = parsedId[0];
+    const id = parsedId[1];
+
+    console.log('on_change_item', name, id, val);
+
+    const item = $$('list1').getItem(id);
+    item[name] = val;
+
+    $$("list1").refresh(id);
+}
+
+const ITEM_EVENTS = {
+    onChange: on_change_item,
+};
+
 function connect() {
     const host = $$('host').getValue();
     const port = +$$('port').getValue();
@@ -22,22 +39,10 @@ function connect() {
 
 function send(buttonId) {
     const id = buttonId.split(":")[1];
-    const host = $$('host:'+id).getValue();
-    const port = +$$('port:'+id).getValue();
-    const user = $$('user:'+id).getValue();
-    const password = $$('password:'+id).getValue();
-    const type = $$('type:'+id).getValue();
-    const query = $$('query:'+id).getValue();
+    const item = $$('list1').getItem(id);
 
     webix.ajax().headers({ "Content-type": "application/json" })
-        .post('/api/call', {
-            host,
-            port,
-            user,
-            password,
-            type,
-            query,
-        })
+        .post('/api/call', item)
         .then(function (ret) {
             const data = JSON.parse(ret.response);
         })
@@ -61,7 +66,7 @@ function add_new_query() {
 };
 
 function open_new_tab(id) {
-    var item = $$('list1').getItem(id);
+    const item = $$('list1').getItem(id);
 
     if (!$$(item.id)) {
         $$("views").addView({
@@ -69,21 +74,21 @@ function open_new_tab(id) {
             rows: [
                 {
                     cols: [
-                        { view: "text", placeholder: "Request Name", id: "title:" + item.id, value: item.title },
+                        { view: "text", placeholder: "Request Name", id: "title:" + item.id, value: item.title, on: ITEM_EVENTS },
                         { view: "button", value: "Save", id: "save:" + item.id, width: 50, click: save },
                     ],
                 },
                 {
                     cols: [
-                        { view: "combo", options: ["Eval", "Call"], value: item.type, width: 100, id: "type:" + item.id },
-                        { view: "text", placeholder: "Host", value: item.host, id: "host:" + item.id },
-                        { view: "text", placeholder: "Port", value: item.port, id: "port:" + item.id, type: "number", width: 100 },
-                        { view: "text", placeholder: "User", value: item.user, id: "user:" + item.id, width: 100 },
-                        { view: "text", placeholder: "Password", value: item.password, id: "password:" + item.id, type: "password", width: 100 },
+                        { view: "combo", options: ["Eval", "Call"], value: item.type, width: 100, id: "type:" + item.id, on: ITEM_EVENTS },
+                        { view: "text", placeholder: "Host", value: item.host, id: "host:" + item.id, on: ITEM_EVENTS },
+                        { view: "text", placeholder: "Port", value: item.port, id: "port:" + item.id, type: "number", width: 100, on: ITEM_EVENTS },
+                        { view: "text", placeholder: "User", value: item.user, id: "user:" + item.id, width: 100, on: ITEM_EVENTS },
+                        { view: "text", placeholder: "Password", value: item.password, id: "password:" + item.id, type: "password", width: 100, on: ITEM_EVENTS },
                         { view: "button", value: "Send", id: "send:" + item.id, css: "webix_primary", width: 100, click: send },
                     ],
                 },
-                { view: "textarea", placeholder: "Query", value: item.query, id: "query:" + item.id },
+                { view: "textarea", placeholder: "Query", value: item.query, id: "query:" + item.id, on: ITEM_EVENTS },
             ],
         });
 
@@ -112,7 +117,7 @@ webix.ui({
             elements: [
                 { view: "label", label: "TNTV", width: 100 },
                 {},
-                { view: "icon", icon: "wxi-plus", click: add_new_query },
+                { view: "button", label: "New Query", width: 100, click: add_new_query },
             ],
         },
         {
@@ -130,7 +135,7 @@ webix.ui({
                 {
                     rows: [
                         {
-                            type: "clean", rows: [
+                            rows: [
                                 {
                                     id: "tabs",
                                     view: "tabbar",
