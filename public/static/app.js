@@ -44,10 +44,11 @@ function send(buttonId) {
     webix.ajax().headers({ "Content-type": "application/json" })
         .post('/api/query', item)
         .then(function (ret) {
-            const data = JSON.parse(ret.response);
+            const response = JSON.stringify(ret.json(), null, 4);
+            $$('response:' + id).setValue(response);
         })
         .catch(function (ret) {
-            const data = JSON.parse(ret.response);
+            const data = ret.json();
             webix.message(data.error, "error");
         });
 }
@@ -89,6 +90,7 @@ function open_new_tab(id) {
                     ],
                 },
                 { view: "textarea", placeholder: "Query", value: item.query, id: "query:" + item.id, on: ITEM_EVENTS },
+                { view: "textarea", placeholder: "Response", id: "response:" + item.id, readonly: true },
             ],
         });
 
@@ -135,26 +137,21 @@ webix.ui({
                 {
                     rows: [
                         {
-                            rows: [
-                                {
-                                    id: "tabs",
-                                    view: "tabbar",
-                                    multiview: true,
-                                    options: [],
-                                    on: {
-                                        onOptionRemove: on_delete_tab
-                                    },
-                                },
-                                {
-                                    id: "views",
-                                    animate: false,
-                                    cells: [
-                                        { view: "template", id: "tpl" }
-                                    ]
-                                }
-                            ]
+                            id: "tabs",
+                            view: "tabbar",
+                            multiview: true,
+                            options: [],
+                            on: {
+                                onOptionRemove: on_delete_tab
+                            },
                         },
-                        { view: "template", template: "Response", role: "placeholder" },
+                        {
+                            id: "views",
+                            animate: false,
+                            cells: [
+                                { view: "template", id: "tpl" }
+                            ]
+                        }
                     ],
                 },
             ],
