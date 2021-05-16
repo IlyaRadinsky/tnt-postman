@@ -20,6 +20,28 @@ function connect() {
         });
 }
 
+function send() {
+    const host = $$('host').getValue();
+    const query = $$('query').getValue();
+
+    webix.ajax().headers({ "Content-type": "application/json" })
+        .post('/api/call', {
+            host,
+            query,
+        })
+        .then(function (ret) {
+            const data = JSON.parse(ret.response);
+        })
+        .catch(function (ret) {
+            const data = JSON.parse(ret.response);
+            webix.message(data.error, "error");
+        });
+}
+
+function save() {
+
+}
+
 function add_new_query() {
     $$("list1").add({
         title: "New title",
@@ -34,9 +56,23 @@ function open_new_tab(id) {
 
     if (!$$(item.id)) {
         $$("views").addView({
-            view: "template",
             id: item.id,
-            template: "Title:" + item.title + "<br>Year: " + item.year + "<br>Votes: " + item.votes
+            rows: [
+                {
+                    cols: [
+                        { view: "text", placeholder: "Request Name", id: "title:" + item.id, value: item.title },
+                        { view: "button", value: "Save", id: "save:" + item.id, width: 50, click: save },
+                    ],
+                },
+                {
+                    cols: [
+                        { view: "combo", options: ["Eval", "Call"], value: "Eval", width: 100, id: "type:" + item.id },
+                        { view: "text", placeholder: "host", id: "host:" + item.id },
+                        { view: "button", value: "Send", id: "send:" + item.id, css: "webix_primary", width: 100, click: send },
+                    ],
+                },
+                { view: "textarea", placeholder: "query", id: "query:" + item.id },
+            ],
         });
 
         $$("tabs").addOption({ id: item.id, value: item.title, close: true }, true);
