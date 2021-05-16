@@ -42,7 +42,7 @@ function send(buttonId) {
     const item = $$('list1').getItem(id);
 
     webix.ajax().headers({ "Content-type": "application/json" })
-        .post('/api/call', item)
+        .post('/api/query', item)
         .then(function (ret) {
             const data = JSON.parse(ret.response);
         })

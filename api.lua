@@ -48,6 +48,46 @@ function export.new()
         return true
     end
 
+    function api.query(opts)
+        checks({
+            host = 'string',
+            port = 'number',
+            user = '?string',
+            password = '?string',
+            type = 'string',
+            query = 'string',
+        })
+
+        local host = opts.host
+        local port = opts.port
+        local user = opts.user
+        local password = opts.password
+        local type = opts.type
+        local query = opts.query
+
+        log.info(string.format('Trying to connect to: %s:%s', host, port))
+
+        local connection = netbox.connect(host, port, {user=user, password=password})
+
+        if connection.error then
+            return false, connection.error
+        end
+
+        log.info('Connection OK')
+
+        local ret = {}
+
+        if type == 'Call' then
+            ret = connection:call(query, {})
+        else
+            ret = connection:eval(query)
+        end
+
+        connection:close()
+
+        return true, ret
+    end
+
     return api
 end
 
