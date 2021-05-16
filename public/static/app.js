@@ -20,13 +20,22 @@ function connect() {
         });
 }
 
-function send() {
-    const host = $$('host').getValue();
-    const query = $$('query').getValue();
+function send(buttonId) {
+    const id = buttonId.split(":")[1];
+    const host = $$('host:'+id).getValue();
+    const port = +$$('port:'+id).getValue();
+    const user = $$('user:'+id).getValue();
+    const password = $$('password:'+id).getValue();
+    const type = $$('type:'+id).getValue();
+    const query = $$('query:'+id).getValue();
 
     webix.ajax().headers({ "Content-type": "application/json" })
         .post('/api/call', {
             host,
+            port,
+            user,
+            password,
+            type,
             query,
         })
         .then(function (ret) {
@@ -70,7 +79,7 @@ function open_new_tab(id) {
                         { view: "text", placeholder: "Host", value: item.host, id: "host:" + item.id },
                         { view: "text", placeholder: "Port", value: item.port, id: "port:" + item.id, type: "number", width: 100 },
                         { view: "text", placeholder: "User", value: item.user, id: "user:" + item.id, width: 100 },
-                        { view: "text", placeholder: "Password", value: item.password, id: "password", type: "password", width: 100 },
+                        { view: "text", placeholder: "Password", value: item.password, id: "password:" + item.id, type: "password", width: 100 },
                         { view: "button", value: "Send", id: "send:" + item.id, css: "webix_primary", width: 100, click: send },
                     ],
                 },
