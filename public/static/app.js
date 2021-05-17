@@ -90,6 +90,7 @@ function open_new_tab(id) {
                     ],
                 },
                 { view: "textarea", placeholder: "Query", value: item.query, id: "query:" + item.id, on: ITEM_EVENTS },
+                { view: "resizer" },
                 { view: "textarea", placeholder: "Response", id: "response:" + item.id, readonly: true },
             ],
         });
