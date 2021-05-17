@@ -101,10 +101,20 @@ function open_new_tab(id) {
         });
 
         $$("tabs").addOption({ id: item.id, value: item.title, close: true }, true);
+
+        // TODO: have no idea why the first added tab is not shown
+        if ($$("tabs").config.options.length === 1) {
+            $$("tabs").setValue(0);
+            $$("tabs").setValue(item.id);
+        }
     }
     else {
         $$("tabs").setValue(item.id);
     }
+}
+
+function on_clicked_tab(id) {
+    $$("list1").select(id);
 }
 
 function on_delete_tab(id) {
@@ -148,6 +158,7 @@ webix.ui({
                             multiview: true,
                             options: [],
                             on: {
+                                onAfterTabClick: on_clicked_tab,
                                 onOptionRemove: on_delete_tab
                             },
                         },
