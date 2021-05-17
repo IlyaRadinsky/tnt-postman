@@ -58,13 +58,18 @@ function save() {
 }
 
 function add_new_query() {
+    const id = webix.uid();
+
     $$("list1").add({
+        id,
         title: "localhost:3301",
         host: "localhost",
         port: 3301,
         type: "Eval"
     }, 0);
-};
+
+    $$("list1").select(id);
+}
 
 function open_new_tab(id) {
     const item = $$('list1').getItem(id);
@@ -132,7 +137,7 @@ webix.ui({
                     data: [],
                     select: true,
                     on: {
-                        onItemClick: open_new_tab
+                        onAfterSelect: open_new_tab
                     }
                 },
                 {
@@ -150,7 +155,7 @@ webix.ui({
                             id: "views",
                             animate: false,
                             cells: [
-                                { view: "template", id: "tpl" }
+                                { view: "template", id: "tpl", template: "No query selected" }
                             ]
                         }
                     ],
