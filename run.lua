@@ -27,6 +27,8 @@ box.cfg {
     work_dir = DATADIR,
 }
 
+api.create_database()
+
 local http_server = require('http.server')
 local http_router = require('http.router')
 

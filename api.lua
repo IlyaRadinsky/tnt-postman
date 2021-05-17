@@ -8,9 +8,24 @@ function export.new()
 
     local conn = nil
 
+    local query = require('model.query').model()
+
     -----------------
     -- API methods --
     -----------------
+
+    function api.create_database()
+        local query_space = box.schema.space.create(query.SPACE_NAME, {
+            if_not_exists = true
+        })
+        query_space:create_index(query.PRIMARY_INDEX, {
+            type = 'TREE',
+            unique = true,
+            parts = {query.ID, 'string'},
+            if_not_exists = true
+        })
+    end
+
     function api.connect(host, port, user, password)
         checks('string', 'number', '?string', '?string')
 
