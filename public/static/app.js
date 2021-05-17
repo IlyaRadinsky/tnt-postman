@@ -89,9 +89,9 @@ function open_new_tab(id) {
                         { view: "button", value: "Send", id: "send:" + item.id, css: "webix_primary", width: 100, click: send },
                     ],
                 },
-                { view: "textarea", placeholder: "Query", value: item.query, id: "query:" + item.id, on: ITEM_EVENTS },
+                { view: "textarea", placeholder: "Query", value: item.query, id: "query:" + item.id, css: 'json_viewer', on: ITEM_EVENTS },
                 { view: "resizer" },
-                { view: "textarea", placeholder: "Response", id: "response:" + item.id, readonly: true },
+                { view: "textarea", placeholder: "Response", id: "response:" + item.id, readonly: true, css: 'json_viewer' },
             ],
         });
 
