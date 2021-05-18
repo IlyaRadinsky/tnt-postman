@@ -53,12 +53,20 @@ function send(buttonId) {
         });
 }
 
-function save() {
+function save(buttonId) {
+    const id = buttonId.split(":")[1];
+    const item = $$('list1').getItem(id);
 
+    webix.ajax().headers({ "Content-type": "application/json" })
+        .put('/api/query/' + id, item)
+        .catch(function (ret) {
+            const data = ret.json();
+            webix.message(data.error, "error");
+        });
 }
 
 function add_new_query() {
-    const id = webix.uid();
+    const id = '' + webix.uid();
 
     $$("list1").add({
         id,
@@ -142,9 +150,9 @@ webix.ui({
             cols: [
                 {
                     view: "list", id: "list1",
-                    template: "#title#",
+                    template: "<strong>#type#</strong> #title#",
                     width: 250,
-                    data: [],
+                    url: '/api/query',
                     select: true,
                     on: {
                         onAfterSelect: open_new_tab

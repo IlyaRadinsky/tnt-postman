@@ -17,7 +17,7 @@ function query.model()
     model.TYPE = 5
     model.USER = 6
     model.PASSWORD = 7
-    model.CREATE_TS = 8
+    model.QUERY = 8
     model.UPDATE_TS = 9
 
     function model.get_space()
@@ -33,21 +33,13 @@ function query.model()
             type = query_tuple[model.TYPE],
             user = query_tuple[model.USER],
             password = query_tuple[model.PASSWORD],
-            create_ts = query_tuple[model.CREATE_TS],
+            query = query_tuple[model.QUERY],
             update_ts = query_tuple[model.UPDATE_TS],
         }
     end
 
-    function model.get(query_id)
-        return model.get_space():get(query_id)
-    end
-
-    function model.get_all(offset, limit)
-        return model.get_space():select({}, {iterator = 'GT', offset = offset, limit = limit})
-    end
-
-    function model.get_total()
-        return model.get_space():len()
+    function model.get()
+        return model.get_space():select({})
     end
 
     function model.upsert(query_tuple)

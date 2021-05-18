@@ -5,6 +5,7 @@ function export.new()
     local log = require('log')
     local checks = require('checks')
     local netbox = require('net.box')
+    local utils = require('utils')
 
     local conn = nil
 
@@ -73,16 +74,9 @@ function export.new()
             query = 'string',
         })
 
-        local host = opts.host
-        local port = opts.port
-        local user = opts.user
-        local password = opts.password
-        local type = opts.type
-        local query = opts.query
+        log.info(utils.dump(opts))
 
-        log.info(string.format('Trying to connect to: %s:%s', host, port))
-
-        local connection = netbox.connect(host, port, {user=user, password=password})
+        local connection = netbox.connect(opts.host, opts.port, {user=opts.user, password=opts.password})
 
         if connection.error then
             return false, connection.error
@@ -93,14 +87,53 @@ function export.new()
         local ret = {}
 
         if type == 'Call' then
-            ret = connection:call(query, {})
+            ret = connection:call(opts.query, {})
         else
-            ret = connection:eval(query)
+            ret = connection:eval(opts.query)
         end
 
         connection:close()
 
         return true, ret
+    end
+
+    function api.save_query(opts)
+        checks({
+            id = 'string',
+            title = '?string',
+            host = 'string',
+            port = 'number',
+            user = '?string',
+            password = '?string',
+            type = 'string',
+            query = 'string',
+        })
+
+        query.upsert({
+            [query.ID] = opts.id,
+            [query.TITLE] = opts.title,
+            [query.HOST] = opts.host,
+            [query.PORT] = opts.port,
+            [query.USER] = opts.user,
+            [query.PASSWORD] = opts.password,
+            [query.TYPE] = opts.type,
+            [query.QUERY] = opts.query,
+        })
+    end
+
+    function api.get_queries()
+        local data = query.get()
+
+        local result = {}
+        for k,v in pairs(data) do
+            result[k] = query.serialize(v)
+        end
+
+        return result
+    end
+
+    function api.delete_query(id)
+        query.delete(id)
     end
 
     return api
