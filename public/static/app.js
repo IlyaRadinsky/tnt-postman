@@ -48,8 +48,10 @@ function send(buttonId) {
             $$('response:' + id).setValue(response);
         })
         .catch(function (ret) {
-            const data = ret.json();
-            webix.message(data.error, "error");
+            let response = '';
+            response += 'Status: (' + ret.status + ') ' + ret.statusText + '\n\n';
+            response += ret.responseText;
+            $$('response:' + id).setValue(response);
         });
 }
 
