@@ -6,6 +6,17 @@ function utils.now()
     return math.floor(fiber.time())
 end
 
+function utils.time(tm)
+    if tm == nil then
+        tm = fiber.time64()
+    elseif tm < 0 then
+        tm = 0
+    else
+        tm = tm * 1000000
+    end
+    return 0ULL + tm
+end
+
 function utils.format(string, tab)
     return (string:gsub('($%b{})', function(word) return tab[word:sub(3, -2)] or word end))
 end

@@ -1,3 +1,9 @@
+@import url('/static/libs/fonts/RobotoMono-Regular.ttf');
+
 .warning {
     color: #FF5C4C !important;
+}
+
+.json_viewer.webix_el_textarea textarea {
+    font-family: 'Roboto Mono', monospace;
 }
