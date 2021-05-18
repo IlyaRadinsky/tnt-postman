@@ -67,15 +67,18 @@ function save(buttonId) {
         });
 }
 
-function add_new_query() {
+function add_new_query(src) {
     const id = '' + webix.uid();
 
     $$("list1").add({
         id,
-        title: "localhost:3301",
-        host: "localhost",
-        port: 3301,
-        type: "Eval"
+        title: src.title ? src.title + ' Copy' : "localhost:3301",
+        host: src.host || "localhost",
+        port: src.port || 3301,
+        type: src.type || "Eval",
+        user: src.user || "",
+        password: src.password || "",
+        query: src.query || "",
     }, 0);
 
     $$("list1").select(id);
@@ -158,7 +161,8 @@ webix.ui({
                     select: true,
                     on: {
                         onAfterSelect: open_new_tab
-                    }
+                    },
+                    onContext: {},
                 },
                 {
                     rows: [
@@ -184,4 +188,21 @@ webix.ui({
             ],
         },
     ],
+});
+
+webix.ui({
+    view: "contextmenu",
+    id: "cm",
+    data: ["Delete", "Duplicate"],
+    master: $$("list1"),
+    on: {
+        onMenuItemClick: function (id) {
+            const context = this.getContext();
+
+            if (id === "Duplicate") {
+                const item = $$('list1').getItem(context.id);
+                add_new_query(item);
+            }
+        }
+    }
 });
