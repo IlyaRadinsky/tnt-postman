@@ -86,9 +86,11 @@ function export.new()
 
         local ret = {}
 
-        if type == 'Call' then
+        if opts.type == 'Call' then
+            log.info('Making call()')
             ret = connection:call(opts.query, {})
         else
+            log.info('Making eval()')
             ret = connection:eval(opts.query)
         end
 
