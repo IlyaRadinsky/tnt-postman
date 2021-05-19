@@ -144,6 +144,7 @@ webix.ui({
                     },
                     onContext: {},
                 },
+                { view: "resizer" },
                 {
                     rows: [
                         {
