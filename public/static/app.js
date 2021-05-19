@@ -193,15 +193,27 @@ webix.ui({
 webix.ui({
     view: "contextmenu",
     id: "cm",
-    data: ["Delete", "Duplicate"],
+    data: ["Duplicate", "Delete"],
     master: $$("list1"),
     on: {
         onMenuItemClick: function (id) {
             const context = this.getContext();
+            const item = $$('list1').getItem(context.id);
 
             if (id === "Duplicate") {
-                const item = $$('list1').getItem(context.id);
                 add_new_query(item);
+            } else if (id === "Delete") {
+                webix.confirm({
+                    text: "Are you sure to delete<br />" + item.type + " <strong>" + item.title + "</strong>?",
+                    type: "confirm-warning",
+                }).then(function (result) {
+                    webix.ajax().headers({ "Content-type": "application/json" })
+                    .del('/api/query/' + context.id)
+                    .then(function () {
+                        on_delete_tab(context.id);
+                        $$("list1").remove(context.id);
+                    });
+                });
             }
         }
     }
