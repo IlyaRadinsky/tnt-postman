@@ -74,8 +74,6 @@ function export.new()
             query = 'string',
         })
 
-        log.info(utils.dump(opts))
-
         local connection = netbox.connect(opts.host, opts.port, {user=opts.user, password=opts.password})
 
         if connection.error then
