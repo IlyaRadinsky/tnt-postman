@@ -57,6 +57,8 @@ function add_new_query(src) {
         user: src.user || "",
         password: src.password || "",
         query: src.query || "",
+        parent_id: src.parent_id,
+        flags: src.flags || 0,
     }, 0);
 
     $$("list1").select(id);

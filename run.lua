@@ -104,6 +104,8 @@ local function on_put_query(req)
     local password = req:post_param('password')
     local type = req:post_param('type')
     local query = req:post_param('query')
+    local parent_id = req:post_param('parent_id')
+    local flags = tonumber(req:post_param('flags'))
 
     if query_id ~= id then
         return json_response(400, { error = 'Invalid query ID' })
@@ -135,6 +137,8 @@ local function on_put_query(req)
         password = password,
         type = type,
         query = query,
+        parent_id = parent_id,
+        flags = flags,
     })
 
     return json_response(200, {})

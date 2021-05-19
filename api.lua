@@ -67,6 +67,8 @@ function export.new()
             password = '?string',
             type = 'string',
             query = 'string',
+            parent_id = '?string',
+            flags = '?number',
         })
 
         query.upsert({
@@ -78,6 +80,8 @@ function export.new()
             [query.PASSWORD] = opts.password,
             [query.TYPE] = opts.type,
             [query.QUERY] = opts.query,
+            [query.PARENT_ID] = opts.parent_id,
+            [query.FLAGS] = opts.flags,
         })
     end
 

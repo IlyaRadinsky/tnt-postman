@@ -19,6 +19,8 @@ function query.model()
     model.PASSWORD = 7
     model.QUERY = 8
     model.UPDATE_TS = 9
+    model.PARENT_ID = 10
+    model.FLAGS = 11
 
     function model.get_space()
         return box.space[model.SPACE_NAME]
@@ -35,6 +37,8 @@ function query.model()
             password = query_tuple[model.PASSWORD],
             query = query_tuple[model.QUERY],
             update_ts = query_tuple[model.UPDATE_TS],
+            parent_id = query_tuple[model.PARENT_ID],
+            flags = query_tuple[model.FLAGS],
         }
     end
 
