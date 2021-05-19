@@ -15,28 +15,6 @@ const ITEM_EVENTS = {
     onChange: on_change_item,
 };
 
-function connect() {
-    const host = $$('host').getValue();
-    const port = +$$('port').getValue();
-    const user = $$('user').getValue();
-    const password = $$('password').getValue();
-
-    webix.ajax().headers({ "Content-type": "application/json" })
-        .post('/api/connection', {
-            host,
-            port,
-            user,
-            password,
-        })
-        .then(function (ret) {
-            const data = JSON.parse(ret.response);
-        })
-        .catch(function (ret) {
-            const data = JSON.parse(ret.response);
-            webix.message(data.error, "error");
-        });
-}
-
 function send(buttonId) {
     const id = buttonId.split(":")[1];
     const item = $$('list1').getItem(id);
@@ -94,7 +72,7 @@ function open_new_tab(id) {
                 {
                     cols: [
                         { view: "text", placeholder: "Request Name", id: "title:" + item.id, value: item.title, on: ITEM_EVENTS },
-                        { view: "button", value: "Save", id: "save:" + item.id, width: 50, click: save },
+                        { view: "button", value: "Save", id: "save:" + item.id, width: 50, css: "webix_primary", click: save },
                     ],
                 },
                 {
@@ -104,7 +82,7 @@ function open_new_tab(id) {
                         { view: "text", placeholder: "Port", value: item.port, id: "port:" + item.id, type: "number", width: 100, on: ITEM_EVENTS },
                         { view: "text", placeholder: "User", value: item.user, id: "user:" + item.id, width: 100, on: ITEM_EVENTS },
                         { view: "text", placeholder: "Password", value: item.password, id: "password:" + item.id, type: "password", width: 100, on: ITEM_EVENTS },
-                        { view: "button", value: "Send", id: "send:" + item.id, css: "webix_primary", width: 100, click: send },
+                        { view: "button", value: "Execute", id: "send:" + item.id, width: 100, click: send },
                     ],
                 },
                 { view: "textarea", placeholder: "Query", value: item.query, id: "query:" + item.id, css: 'json_viewer', on: ITEM_EVENTS },

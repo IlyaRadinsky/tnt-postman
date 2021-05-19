@@ -48,44 +48,6 @@ local function on_get_index(req)
     return req:render({})
 end
 
-local function on_post_connection(req)
-    local host = req:post_param('host')
-    local port = req:post_param('port')
-    local user = req:post_param('user')
-    local password = req:post_param('password')
-
-    if not utils.not_empty_string(host) then
-        return json_response(400, { error = 'Invalid host' })
-    end
-
-    if not utils.positive_number(port) then
-        return json_response(400, { error = 'Invalid port' })
-    end
-
-    if not utils.not_empty_string(user) or not utils.not_empty_string(password) then
-        user = nil
-        password = nil
-    end
-
-    ok, err = api.connect(host, port, user, password)
-
-    if not ok then
-        return json_response(400, { error = err })
-    end
-
-    return json_response(200, {})
-end
-
-local function on_delete_connection(req)
-    ok, err = api.disconnect()
-
-    if not ok then
-        return json_response(400, { error = err })
-    end
-
-    return json_response(200, {})
-end
-
 local function on_post_query(req)
     local host = req:post_param('host')
     local port = tonumber(req:post_param('port'))
@@ -188,8 +150,6 @@ local server = http_server.new(HOST, PORT)
 local router = http_router.new({ app_dir = WORKDIR })
 server:set_router(router)
 router:route({ path = '/', method = 'GET', file = 'index.html' }, on_get_index)
-router:route({ path = '/api/connection', method = 'POST' }, on_post_connection)
-router:route({ path = '/api/connection', method = 'DELETE' }, on_delete_connection)
 router:route({ path = '/api/query', method = 'POST' }, on_post_query)
 router:route({ path = '/api/query', method = 'GET' }, on_get_query)
 router:route({ path = '/api/query/:id', method = 'PUT' }, on_put_query)
