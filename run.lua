@@ -23,7 +23,7 @@ log.info('DATADIR: ' .. DATADIR)
 log.info('\n')
 
 box.cfg {
-    listen = 3302,
+    listen = 3299,
     work_dir = DATADIR,
 }
 
@@ -32,8 +32,8 @@ api.create_database()
 local http_server = require('http.server')
 local http_router = require('http.router')
 
-local HOST = '127.0.0.1'
-local PORT = 8089
+local HOST = '0.0.0.0'
+local PORT = 9099
 
 local function json_response(status, obj)
     checks('number', 'table')
