@@ -1,3 +1,5 @@
+# Architecture
+`tnt-viewer` is written as a web application in LUA, using `webix` for the client side processing and UI. On the server side, `Tarantool` is being utilised.
 # Installation
 ```
 tarantoolctl rocks build
