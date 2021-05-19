@@ -210,7 +210,7 @@ webix.ui({
                     webix.ajax().headers({ "Content-type": "application/json" })
                     .del('/api/query/' + context.id)
                     .then(function () {
-                        on_delete_tab(context.id);
+                        $$("tabs").removeOption(context.id);
                         $$("list1").remove(context.id);
                     });
                 });
