@@ -1,15 +1,6 @@
 # Architecture
 tnt-postman is written as a web application in LUA, using webix for the client side processing and UI. On the server side, Tarantool is being utilised.
 ![Screenshot 2021-05-20 at 09 14 52](https://user-images.githubusercontent.com/9526468/118928585-1a032980-b94c-11eb-8276-dad56c84ff9c.png)
-# Environment Variables
-- #### TNT_POSTMAN_DATA_DIR
-default current folder
-- #### TNT_POSTMAN_HOST
-default '0.0.0.0'
-- #### TNT_POSTMAN_HOST_PORT
-default 3299
-- #### TNT_POSTMAN_HTTP_PORT
-default 9090
 # How to use Docker image
 In order to run a container with our image, execute:
 
@@ -20,6 +11,15 @@ docker run \
     -v ~/data/tnt-postman:/opt/tarantool/.data \
     ilyaradinsky/tnt-postman
 ```
+# Environment Variables
+- #### TNT_POSTMAN_DATA_DIR
+default current folder
+- #### TNT_POSTMAN_HOST
+default '0.0.0.0'
+- #### TNT_POSTMAN_HOST_PORT
+default 3299
+- #### TNT_POSTMAN_HTTP_PORT
+default 9090
 # Bleeding Edge
 For development or just to try out the latest features, you may want to install tnt-postman directly from source.
 
