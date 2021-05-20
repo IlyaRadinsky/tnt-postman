@@ -12,6 +12,6 @@ RUN tarantoolctl rocks build
 
 VOLUME ["/opt/tarantool/.data"]
 
-EXPOSE 80
+EXPOSE 9090
 
 CMD ["tarantool", "run.lua"]

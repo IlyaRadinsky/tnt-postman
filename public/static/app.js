@@ -56,7 +56,7 @@ function add_new_query(src) {
         type: src.type || "Eval",
         user: src.user || "",
         password: src.password || "",
-        query: src.query || "",
+        query: src.query || "return box.info",
         parent_id: src.parent_id,
         flags: src.flags || 0,
     }, 0);

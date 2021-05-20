@@ -17,5 +17,5 @@ tarantool run.lua
 ```
 2. Browse the URL
 ```
-localhost:9099
+localhost:9090
 ```

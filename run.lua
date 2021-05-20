@@ -2,7 +2,6 @@
 
 require('strict').on()
 
-local log = require('log')
 local fio = require('fio')
 local json = require('json')
 local checks = require('checks')
@@ -10,20 +9,15 @@ local utils = require('utils')
 local api = require('api').new()
 
 local WORKDIR = fio.abspath(fio.dirname(arg[0]))
-local DATADIR = WORKDIR .. '/' .. '.data'
+local DATADIR = os.getenv('TNT_POSTMAN_DATA_DIR') or WORKDIR .. '/' .. '.data'
 
 local ok, err = fio.mktree(DATADIR)
 if not ok then
     error(err, 0)
 end
 
-log.info('\n')
-log.info('WORKDIR: ' .. WORKDIR)
-log.info('DATADIR: ' .. DATADIR)
-log.info('\n')
-
 box.cfg {
-    listen = 3301,
+    listen = os.getenv('TNT_POSTMAN_HOST_PORT') or 3299,
     memtx_dir = DATADIR,
     work_dir = DATADIR,
     wal_dir = DATADIR,
@@ -35,8 +29,8 @@ api.create_database()
 local http_server = require('http.server')
 local http_router = require('http.router')
 
-local HOST = '0.0.0.0'
-local PORT = 80
+local HOST = os.getenv('TNT_POSTMAN_HOST') or '0.0.0.0'
+local PORT = os.getenv('TNT_POSTMAN_HTTP_PORT') or 9090
 
 local function json_response(status, obj)
     checks('number', 'table')
