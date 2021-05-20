@@ -126,7 +126,7 @@ webix.ui({
             view: "toolbar",
             padding: { right: 10, left: 10 },
             elements: [
-                { view: "label", label: "TNTV", width: 100 },
+                { view: "label", label: "TNT Postman", width: 100 },
                 {},
                 { view: "button", label: "New Query", width: 100, click: add_new_query },
             ],

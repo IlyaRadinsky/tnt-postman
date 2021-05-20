@@ -12,13 +12,6 @@ RUN tarantoolctl rocks build
 
 VOLUME ["/opt/tarantool/.data"]
 
-EXPOSE 3299 80
+EXPOSE 80
 
-# Allow all users to execute both the script to start the server
-# and the script that intercepts termination requests
-RUN chmod a+x ./start_server.sh
-RUN chmod a+x ./intercept.sh
-
-STOPSIGNAL SIGINT
-
-CMD ["./intercept.sh"]
+CMD ["tarantool", "run.lua"]
