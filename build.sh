@@ -1,2 +1,2 @@
 #!/bin/bash
-docker build --tag ilyaradinsky/tnt-viewer:0.1 .
+docker build --tag ilyaradinsky/tntAdmin:0.1 .
