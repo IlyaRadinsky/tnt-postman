@@ -1,5 +1,14 @@
 # Architecture
 tnt-postman is written as a web application in LUA, using webix for the client side processing and UI. On the server side, Tarantool is being utilised.
+# Environment Variables
+- #### TNT_POSTMAN_DATA_DIR
+default current folder
+- #### TNT_POSTMAN_HOST
+default '0.0.0.0'
+- #### TNT_POSTMAN_HOST_PORT
+default 3299
+- #### TNT_POSTMAN_HTTP_PORT
+default 9090
 # Bleeding Edge
 For development or just to try out the latest features, you may want to install tnt-postman directly from source.
 
