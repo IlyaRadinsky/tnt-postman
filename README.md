@@ -9,6 +9,16 @@ default '0.0.0.0'
 default 3299
 - #### TNT_POSTMAN_HTTP_PORT
 default 9090
+# How to use Docker image
+In order to run a container with our image, execute:
+
+```
+docker run \
+    -d \
+    -p 9090:9090 \
+    -v ~/data/tnt-postman:/opt/tarantool/.data \
+    ilyaradinsky/tnt-postman
+```
 # Bleeding Edge
 For development or just to try out the latest features, you may want to install tnt-postman directly from source.
 
