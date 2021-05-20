@@ -1,4 +1,4 @@
-package = 'tnt-viewer'
+package = 'tnt-postman'
 version = 'scm-1'
 source  = {
 	url = '/dev/null',
