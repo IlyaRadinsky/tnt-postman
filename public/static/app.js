@@ -6,7 +6,20 @@ function on_change_item(val) {
     console.log('on_change_item', name, id, val);
 
     const item = $$('list1').getItem(id);
-    item[name] = val;
+
+    if (name === "type") {
+        if (val === "Call") {
+            $$("query:" + id).hide();
+            $$("call:" + id).show();
+        } else {
+            $$("query:" + id).show();
+            $$("call:" + id).hide();
+        }
+
+        item[name] = val;
+    } else {
+        item[name] = val;
+    }
 
     $$("list1").refresh(id);
 
@@ -35,6 +48,29 @@ function send(buttonId) {
         });
 }
 
+function del_arg(buttonId) {
+    const idx = +(buttonId.split(":")[0].substring(6));
+    const id = buttonId.split(":")[1];
+    const item = $$('list1').getItem(id);
+    $$("args:" + id).removeView("arg" + idx + ":" + id);
+    item.args.splice(idx, 1);
+}
+
+function add_arg(buttonId) {
+    const id = buttonId.split(":")[1];
+    const item = $$('list1').getItem(id);
+    const idx = item.args.length;
+    $$("args:" + id).addView({
+        id: "arg" + idx + ":" + id,
+        cols: [
+            { view: "text", placeholder: "Arg", id: "arg_value" + idx + ":" + item.id, css: 'json_viewer', on: ITEM_EVENTS },
+            { view: "combo", options: ["String", "Number", "Boolean"], value: "String", width: 100, id: "arg_type" + idx + ":" + item.id, on: ITEM_EVENTS },
+            { view: "button", value: "Del", id: "delArg" + idx + ":" + item.id, width: 50, click: del_arg },
+        ]
+    });
+    item.args.push("");
+}
+
 function save(buttonId) {
     const id = buttonId.split(":")[1];
     const item = $$('list1').getItem(id);
@@ -61,6 +97,7 @@ function add_new_query(src) {
         query: src.query || "return box.info",
         parent_id: src.parent_id,
         flags: src.flags || 0,
+        args: src.args || [],
     }, 0);
 
     $$("list1").select(id);
@@ -89,7 +126,27 @@ function open_new_tab(id) {
                         { view: "button", value: "Execute", id: "send:" + item.id, width: 100, click: send },
                     ],
                 },
-                { view: "textarea", placeholder: "Query", value: item.query, id: "query:" + item.id, css: 'json_viewer', on: ITEM_EVENTS },
+                {
+                    rows: [
+                        { view: "textarea", placeholder: "Query", hidden: item.type !== "Eval", value: item.query, id: "query:" + item.id, css: 'json_viewer', on: ITEM_EVENTS },
+                        {
+                            id: "call:" + item.id,
+                            hidden: item.type !== "Call",
+                            rows: [
+                                {
+                                    cols: [
+                                        { view: "text", placeholder: "Call", value: item.query, id: "call_value:" + item.id, css: 'json_viewer', on: ITEM_EVENTS },
+                                        { view: "button", value: "Add Arg", id: "add_arg:" + item.id, width: 100, click: add_arg },
+                                    ],
+                                },
+                                {
+                                    id: "args:" + item.id,
+                                    rows: [],
+                                },
+                            ],
+                        },
+                    ],
+                },
                 { view: "resizer" },
                 { view: "textarea", placeholder: "Response", id: "response:" + item.id, readonly: true, css: 'json_viewer' },
             ],
@@ -191,11 +248,11 @@ webix.ui({
                     type: "confirm-warning",
                 }).then(function (result) {
                     webix.ajax().headers({ "Content-type": "application/json" })
-                    .del('/api/query/' + context.id)
-                    .then(function () {
-                        $$("tabs").removeOption(context.id);
-                        $$("list1").remove(context.id);
-                    });
+                        .del('/api/query/' + context.id)
+                        .then(function () {
+                            $$("tabs").removeOption(context.id);
+                            $$("list1").remove(context.id);
+                        });
                 });
             }
         }
