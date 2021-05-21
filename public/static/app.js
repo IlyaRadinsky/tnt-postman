@@ -9,6 +9,8 @@ function on_change_item(val) {
     item[name] = val;
 
     $$("list1").refresh(id);
+
+    $$("save:" + id).define("css", "webix_primary");
 }
 
 const ITEM_EVENTS = {
@@ -74,7 +76,7 @@ function open_new_tab(id) {
                 {
                     cols: [
                         { view: "text", placeholder: "Request Name", id: "title:" + item.id, value: item.title, on: ITEM_EVENTS },
-                        { view: "button", value: "Save", id: "save:" + item.id, width: 50, css: "webix_primary", click: save },
+                        { view: "button", value: "Save", id: "save:" + item.id, width: 50, click: save },
                     ],
                 },
                 {
