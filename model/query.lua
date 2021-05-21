@@ -21,6 +21,7 @@ function query.model()
     model.UPDATE_TS = 9
     model.PARENT_ID = 10
     model.FLAGS = 11
+    model.ARGS = 12
 
     function model.get_space()
         return box.space[model.SPACE_NAME]
@@ -39,6 +40,7 @@ function query.model()
             update_ts = query_tuple[model.UPDATE_TS],
             parent_id = query_tuple[model.PARENT_ID],
             flags = query_tuple[model.FLAGS],
+            args = query_tuple[model.ARGS] or {},
         }
     end
 
