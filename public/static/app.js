@@ -1,6 +1,6 @@
 function on_change_item(val) {
     const parsedId = this.data.id.split(":");
-    const name = parsedId[0];
+    let name = parsedId[0];
     const id = parsedId[1];
 
     console.log('on_change_item', name, id, val);
@@ -15,9 +15,15 @@ function on_change_item(val) {
             $$("query:" + id).show();
             $$("call:" + id).hide();
         }
+    }
 
-        item[name] = val;
+    if (item.type === "Call" && name.substring(0, 9) === "arg_value") {
+        const idx = +name.substring(9);
+        item.args[idx] = val;
     } else {
+        if (name === "call_value") {
+            name = "query";
+        }
         item[name] = val;
     }
 
@@ -30,9 +36,33 @@ const ITEM_EVENTS = {
     onChange: on_change_item,
 };
 
+function prepare_args(item) {
+    if (item.type === "Call") {
+        item.args.forEach(function(v, idx) {
+            if (!v || v.length === 0 ) {
+                item.args[idx] = null;
+            } else {
+                const arg_type_id = "arg_type" + idx + ":" + item.id;
+                const arg_type = $$(arg_type_id).getValue();
+
+                if (arg_type === "Number") {
+                    item.args[idx] = +v;
+                } else if (arg_type === "Boolean") {
+                    item.args[idx] = v.toLowerCase() === 'true';
+                }
+            }
+        });
+    } else {
+        item.args = [];
+    }
+}
+
 function send(buttonId) {
     const id = buttonId.split(":")[1];
-    const item = $$('list1').getItem(id);
+    const orig_item = $$('list1').getItem(id);
+    const item = _.cloneDeep(orig_item);
+
+    prepare_args(item);
 
     webix.ajax().headers({ "Content-type": "application/json" })
         .post('/api/query', item)
@@ -73,7 +103,10 @@ function add_arg(buttonId) {
 
 function save(buttonId) {
     const id = buttonId.split(":")[1];
-    const item = $$('list1').getItem(id);
+    const orig_item = $$('list1').getItem(id);
+    const item = _.cloneDeep(orig_item);
+
+    prepare_args(item);
 
     webix.ajax().headers({ "Content-type": "application/json" })
         .put('/api/query/' + id, item)
