@@ -146,6 +146,40 @@ function save(buttonId) {
         });
 }
 
+function export_query(buttonId) {
+    const id = buttonId.split(":")[1];
+    const orig_item = $$('list1').getItem(id);
+    const item = _.cloneDeep(orig_item);
+
+    prepare_args(item);
+
+    delete item.id;
+    delete item.parent_id;
+    delete item.update_ts;
+
+    webix.ui({
+        view: "window",
+        modal: true,
+        move: true,
+        width: 600, height: 400,
+        position: "center",
+        head: "Export to JSON",
+        body: {
+            rows: [
+                { view: "textarea", readonly: true, css: 'json_viewer', value: JSON.stringify(item, null, 4) },
+                {
+                    cols: [
+                        {},
+                        { view: "button", value: "Close", width: 100, click: function () {
+                            this.getTopParentView().hide();
+                        }}
+                    ]
+                }
+            ]
+        }
+    }).show();
+}
+
 function add_new_query(src) {
     const id = '' + webix.uid();
 
@@ -187,6 +221,7 @@ function open_new_tab(id) {
                         { view: "text", placeholder: "User", value: item.user, id: "user:" + item.id, width: 100, on: ITEM_EVENTS },
                         { view: "text", placeholder: "Password", value: item.password, id: "password:" + item.id, type: "password", width: 100, on: ITEM_EVENTS },
                         { view: "button", value: "Execute", id: "send:" + item.id, width: 100, click: send },
+                        { view: "button", value: "Export", id: "export:" + item.id, css: "webix_transparent", width: 100, click: export_query },
                     ],
                 },
                 {
