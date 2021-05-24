@@ -38,8 +38,8 @@ const ITEM_EVENTS = {
 
 function prepare_args(item) {
     if (item.type === "Call") {
-        item.args.forEach(function(v, idx) {
-            if (!v || v.length === 0 ) {
+        item.args.forEach(function (v, idx) {
+            if (!v || v.length === 0) {
                 item.args[idx] = null;
             } else {
                 const arg_type_id = "arg_type" + idx + ":" + item.id;
@@ -95,7 +95,7 @@ function add_arg(buttonId) {
         cols: [
             { view: "text", placeholder: "Arg", id: "arg_value" + idx + ":" + item.id, css: 'json_viewer', on: ITEM_EVENTS },
             { view: "combo", options: ["String", "Number", "Boolean"], value: "String", width: 100, id: "arg_type" + idx + ":" + item.id, on: ITEM_EVENTS },
-            { view: "button", value: "Del", id: "delArg" + idx + ":" + item.id, width: 50, click: del_arg },
+            { view: "icon", id: "delArg" + idx + ":" + item.id, icon: "wxi-minus", tooltip: "Delete Argument", click: del_arg },
         ]
     });
     item.args.push("");
@@ -151,7 +151,7 @@ function open_new_tab(id) {
                 cols: [
                     { view: "text", placeholder: "Arg", id: "arg_value" + idx + ":" + item.id, css: 'json_viewer', on: ITEM_EVENTS, value: arg_value },
                     { view: "combo", options: ["String", "Number", "Boolean"], value: arg_type, width: 100, id: "arg_type" + idx + ":" + item.id, on: ITEM_EVENTS },
-                    { view: "button", value: "Del", id: "delArg" + idx + ":" + item.id, width: 50, click: del_arg },
+                    { view: "icon", id: "delArg" + idx + ":" + item.id, icon: "wxi-minus", tooltip: "Delete Argument", click: del_arg },
                 ]
             });
         });
@@ -185,7 +185,7 @@ function open_new_tab(id) {
                                 {
                                     cols: [
                                         { view: "text", placeholder: "Call", value: item.query, id: "call_value:" + item.id, css: 'json_viewer', on: ITEM_EVENTS },
-                                        { view: "button", value: "Add Arg", id: "add_arg:" + item.id, width: 100, click: add_arg },
+                                        { view: "icon", id: "add_arg:" + item.id, icon: "wxi-plus", tooltip: "Add Argument", click: add_arg },
                                     ],
                                 },
                                 {
