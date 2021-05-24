@@ -180,23 +180,64 @@ function export_query(buttonId) {
     }).show();
 }
 
-function add_new_query(src) {
+function import_query() {
+    webix.ui({
+        view: "window",
+        modal: true,
+        move: true,
+        width: 600, height: 400,
+        position: "center",
+        head: "Import from JSON",
+        body: {
+            rows: [
+                { id: "import_json", view: "textarea", css: 'json_viewer' },
+                {
+                    cols: [
+                        {},
+                        { view: "button", value: "Import", width: 100, click: function () {
+                            try {
+                                const item = JSON.parse($$("import_json").getValue());
+                                add_new_query(item, true);
+                                this.getTopParentView().hide();
+                            } catch (e) {
+                                webix.message(e.message, "error");
+                            }
+                        }},
+                        { view: "button", value: "Close", width: 100, click: function () {
+                            this.getTopParentView().hide();
+                        }}
+                    ]
+                }
+            ]
+        }
+    }).show();
+}
+
+function add_new_query(src, do_import) {
     const id = '' + webix.uid();
+    let new_item = {};
 
-    $$("list1").add({
-        id,
-        title: src.title ? src.title + ' Copy' : "localhost:3301",
-        host: src.host || "localhost",
-        port: src.port || 3301,
-        type: src.type || "Eval",
-        user: src.user || "",
-        password: src.password || "",
-        query: src.query || "return box.info",
-        parent_id: src.parent_id,
-        flags: src.flags || 0,
-        args: src.args || [],
-    }, 0);
+    if (do_import) {
+        const args = src.args || [];
+        const flags = src.flags || 0;
+        _.assign(new_item, { id }, src, { args, flags });
+    } else {
+        _.assign(new_item, {
+            id,
+            title: src.title ? src.title + ' Copy' : "localhost:3301",
+            host: src.host || "localhost",
+            port: src.port || 3301,
+            type: src.type || "Eval",
+            user: src.user || "",
+            password: src.password || "",
+            query: src.query || "return box.info",
+            parent_id: src.parent_id,
+            flags: src.flags || 0,
+            args: src.args || [],
+        });
+    }
 
+    $$("list1").add(new_item, 0);
     $$("list1").select(id);
 }
 
@@ -284,6 +325,7 @@ webix.ui({
             padding: { right: 10, left: 10 },
             elements: [
                 { view: "label", label: "TNT Postman", width: 100 },
+                { view: "button", label: "Import Query", width: 100, click: import_query },
                 {},
                 { view: "button", label: "New Query", width: 100, click: add_new_query },
             ],
