@@ -93,6 +93,8 @@ function build_args(item) {
                 { view: "icon", id: "delArg" + idx + ":" + item.id, icon: "wxi-minus", tooltip: "Delete Argument", click: del_arg },
             ]
         });
+
+        item.args[idx] = arg_value;
     });
 
     return args;
