@@ -16,6 +16,20 @@ function export.new()
         local query_space = box.schema.space.create(query.SPACE_NAME, {
             if_not_exists = true
         })
+        query_space:format({
+            {'id', 'string'},
+            {'title', 'string'},
+            {'host', 'string'},
+            {'port', 'unsigned'},
+            {'type', 'string'},
+            {'user', 'string', is_nullable = true},
+            {'password', 'string', is_nullable = true},
+            {'query', 'string'},
+            {'updated_ts', 'unsigned'},
+            {'parent_id', 'string', is_nullable = true},
+            {'flags', 'unsigned'},
+            {'args', 'array'},
+        })
         query_space:create_index(query.PRIMARY_INDEX, {
             type = 'TREE',
             unique = true,
