@@ -78,12 +78,40 @@ function send(buttonId) {
         });
 }
 
+function build_args(item) {
+    const args = [];
+
+    item.args.forEach(function (v, idx) {
+        const arg_type = _.isNumber(v) ? "Number" : (_.isBoolean(v) ? "Boolean" : "String");
+        const arg_value = _.toString(v);
+
+        args.push({
+            id: "arg" + idx + ":" + item.id,
+            cols: [
+                { view: "text", placeholder: "Arg", id: "arg_value" + idx + ":" + item.id, css: 'json_viewer', on: ITEM_EVENTS, value: arg_value },
+                { view: "combo", options: ["String", "Number", "Boolean"], value: arg_type, width: 100, id: "arg_type" + idx + ":" + item.id, on: ITEM_EVENTS },
+                { view: "icon", id: "delArg" + idx + ":" + item.id, icon: "wxi-minus", tooltip: "Delete Argument", click: del_arg },
+            ]
+        });
+    });
+
+    return args;
+}
+
 function del_arg(buttonId) {
     const idx = +(buttonId.split(":")[0].substring(6));
     const id = buttonId.split(":")[1];
     const item = $$('list1').getItem(id);
-    $$("args:" + id).removeView("arg" + idx + ":" + id);
     item.args.splice(idx, 1);
+
+    webix.ui(
+        {
+            id: "args:" + item.id,
+            rows: build_args(item),
+        },
+        $$("call:" + item.id),
+        $$("args:" + item.id),
+    );
 }
 
 function add_arg(buttonId) {
@@ -140,22 +168,6 @@ function open_new_tab(id) {
     const item = $$('list1').getItem(id);
 
     if (!$$(item.id)) {
-        const args = [];
-
-        item.args.forEach(function (v, idx) {
-            const arg_type = _.isNumber(v) ? "Number" : (_.isBoolean(v) ? "Boolean" : "String");
-            const arg_value = _.toString(v);
-
-            args.push({
-                id: "arg" + idx + ":" + id,
-                cols: [
-                    { view: "text", placeholder: "Arg", id: "arg_value" + idx + ":" + item.id, css: 'json_viewer', on: ITEM_EVENTS, value: arg_value },
-                    { view: "combo", options: ["String", "Number", "Boolean"], value: arg_type, width: 100, id: "arg_type" + idx + ":" + item.id, on: ITEM_EVENTS },
-                    { view: "icon", id: "delArg" + idx + ":" + item.id, icon: "wxi-minus", tooltip: "Delete Argument", click: del_arg },
-                ]
-            });
-        });
-
         $$("views").addView({
             id: item.id,
             rows: [
@@ -190,7 +202,7 @@ function open_new_tab(id) {
                                 },
                                 {
                                     id: "args:" + item.id,
-                                    rows: args,
+                                    rows: build_args(item),
                                 },
                             ],
                         },
