@@ -52,6 +52,7 @@ local function on_post_query(req)
     local password = req:post_param('password')
     local type = req:post_param('type')
     local query = req:post_param('query')
+    local args = req:post_param('args')
 
     if not utils.not_empty_string(host) then
         return json_response(400, { error = 'Invalid host' })
@@ -70,6 +71,14 @@ local function on_post_query(req)
         return json_response(400, { error = 'Invalid host' })
     end
 
+    if not utils.not_empty_string(query) then
+        if type == 'Eval' then
+            return json_response(400, { error = 'Invalid query' })
+        elseif type == 'Call' then
+            return json_response(400, { error = 'Invalid call' })
+        end
+    end
+
     ok, err = api.query({
         host = host,
         port = port,
@@ -77,6 +86,7 @@ local function on_post_query(req)
         password = password,
         type = type,
         query = query,
+        args = args,
     })
 
     if not ok then
@@ -103,6 +113,7 @@ local function on_put_query(req)
     local query = req:post_param('query')
     local parent_id = req:post_param('parent_id')
     local flags = tonumber(req:post_param('flags'))
+    local args = req:post_param('args')
 
     if query_id ~= id then
         return json_response(400, { error = 'Invalid query ID' })
@@ -125,6 +136,14 @@ local function on_put_query(req)
         return json_response(400, { error = 'Invalid host' })
     end
 
+    if not utils.not_empty_string(query) then
+        if type == 'Eval' then
+            return json_response(400, { error = 'Invalid query' })
+        elseif type == 'Call' then
+            return json_response(400, { error = 'Invalid call' })
+        end
+    end
+
     api.save_query({
         id = id,
         title = title,
@@ -136,6 +155,7 @@ local function on_put_query(req)
         query = query,
         parent_id = parent_id,
         flags = flags,
+        args = args,
     })
 
     return json_response(200, {})

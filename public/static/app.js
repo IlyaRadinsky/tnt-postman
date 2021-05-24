@@ -1,23 +1,68 @@
 function on_change_item(val) {
     const parsedId = this.data.id.split(":");
-    const name = parsedId[0];
+    let name = parsedId[0];
     const id = parsedId[1];
 
     console.log('on_change_item', name, id, val);
 
     const item = $$('list1').getItem(id);
-    item[name] = val;
+
+    if (name === "type") {
+        if (val === "Call") {
+            $$("query:" + id).hide();
+            $$("call:" + id).show();
+        } else {
+            $$("query:" + id).show();
+            $$("call:" + id).hide();
+        }
+    }
+
+    if (item.type === "Call" && name.substring(0, 9) === "arg_value") {
+        const idx = +name.substring(9);
+        item.args[idx] = val;
+    } else {
+        if (name === "call_value") {
+            name = "query";
+        }
+        item[name] = val;
+    }
 
     $$("list1").refresh(id);
+
+    $$("save:" + id).define("css", "webix_primary");
 }
 
 const ITEM_EVENTS = {
     onChange: on_change_item,
 };
 
+function prepare_args(item) {
+    if (item.type === "Call") {
+        item.args.forEach(function (v, idx) {
+            if (!v || v.length === 0) {
+                item.args[idx] = null;
+            } else {
+                const arg_type_id = "arg_type" + idx + ":" + item.id;
+                const arg_type = $$(arg_type_id).getValue();
+
+                if (arg_type === "Number") {
+                    item.args[idx] = +v;
+                } else if (arg_type === "Boolean") {
+                    item.args[idx] = v.toLowerCase() === 'true';
+                }
+            }
+        });
+    } else {
+        item.args = [];
+    }
+}
+
 function send(buttonId) {
     const id = buttonId.split(":")[1];
-    const item = $$('list1').getItem(id);
+    const orig_item = $$('list1').getItem(id);
+    const item = _.cloneDeep(orig_item);
+
+    prepare_args(item);
 
     webix.ajax().headers({ "Content-type": "application/json" })
         .post('/api/query', item)
@@ -33,9 +78,65 @@ function send(buttonId) {
         });
 }
 
-function save(buttonId) {
+function build_args(item) {
+    const args = [];
+
+    item.args.forEach(function (v, idx) {
+        const arg_type = _.isNumber(v) ? "Number" : (_.isBoolean(v) ? "Boolean" : "String");
+        const arg_value = _.toString(v);
+
+        args.push({
+            id: "arg" + idx + ":" + item.id,
+            cols: [
+                { view: "text", placeholder: "Arg", id: "arg_value" + idx + ":" + item.id, css: 'json_viewer', on: ITEM_EVENTS, value: arg_value },
+                { view: "combo", options: ["String", "Number", "Boolean"], value: arg_type, width: 100, id: "arg_type" + idx + ":" + item.id, on: ITEM_EVENTS },
+                { view: "icon", id: "delArg" + idx + ":" + item.id, icon: "wxi-minus", tooltip: "Delete Argument", click: del_arg },
+            ]
+        });
+
+        item.args[idx] = arg_value;
+    });
+
+    return args;
+}
+
+function del_arg(buttonId) {
+    const idx = +(buttonId.split(":")[0].substring(6));
     const id = buttonId.split(":")[1];
     const item = $$('list1').getItem(id);
+    item.args.splice(idx, 1);
+
+    webix.ui(
+        {
+            id: "args:" + item.id,
+            rows: build_args(item),
+        },
+        $$("call:" + item.id),
+        $$("args:" + item.id),
+    );
+}
+
+function add_arg(buttonId) {
+    const id = buttonId.split(":")[1];
+    const item = $$('list1').getItem(id);
+    const idx = item.args.length;
+    $$("args:" + id).addView({
+        id: "arg" + idx + ":" + id,
+        cols: [
+            { view: "text", placeholder: "Arg", id: "arg_value" + idx + ":" + item.id, css: 'json_viewer', on: ITEM_EVENTS },
+            { view: "combo", options: ["String", "Number", "Boolean"], value: "String", width: 100, id: "arg_type" + idx + ":" + item.id, on: ITEM_EVENTS },
+            { view: "icon", id: "delArg" + idx + ":" + item.id, icon: "wxi-minus", tooltip: "Delete Argument", click: del_arg },
+        ]
+    });
+    item.args.push("");
+}
+
+function save(buttonId) {
+    const id = buttonId.split(":")[1];
+    const orig_item = $$('list1').getItem(id);
+    const item = _.cloneDeep(orig_item);
+
+    prepare_args(item);
 
     webix.ajax().headers({ "Content-type": "application/json" })
         .put('/api/query/' + id, item)
@@ -59,6 +160,7 @@ function add_new_query(src) {
         query: src.query || "return box.info",
         parent_id: src.parent_id,
         flags: src.flags || 0,
+        args: src.args || [],
     }, 0);
 
     $$("list1").select(id);
@@ -74,7 +176,7 @@ function open_new_tab(id) {
                 {
                     cols: [
                         { view: "text", placeholder: "Request Name", id: "title:" + item.id, value: item.title, on: ITEM_EVENTS },
-                        { view: "button", value: "Save", id: "save:" + item.id, width: 50, css: "webix_primary", click: save },
+                        { view: "button", value: "Save", id: "save:" + item.id, width: 50, click: save },
                     ],
                 },
                 {
@@ -87,7 +189,27 @@ function open_new_tab(id) {
                         { view: "button", value: "Execute", id: "send:" + item.id, width: 100, click: send },
                     ],
                 },
-                { view: "textarea", placeholder: "Query", value: item.query, id: "query:" + item.id, css: 'json_viewer', on: ITEM_EVENTS },
+                {
+                    rows: [
+                        { view: "textarea", placeholder: "Query", hidden: item.type !== "Eval", value: item.query, id: "query:" + item.id, css: 'json_viewer', on: ITEM_EVENTS },
+                        {
+                            id: "call:" + item.id,
+                            hidden: item.type !== "Call",
+                            rows: [
+                                {
+                                    cols: [
+                                        { view: "text", placeholder: "Call", value: item.query, id: "call_value:" + item.id, css: 'json_viewer', on: ITEM_EVENTS },
+                                        { view: "icon", id: "add_arg:" + item.id, icon: "wxi-plus", tooltip: "Add Argument", click: add_arg },
+                                    ],
+                                },
+                                {
+                                    id: "args:" + item.id,
+                                    rows: build_args(item),
+                                },
+                            ],
+                        },
+                    ],
+                },
                 { view: "resizer" },
                 { view: "textarea", placeholder: "Response", id: "response:" + item.id, readonly: true, css: 'json_viewer' },
             ],
@@ -189,11 +311,11 @@ webix.ui({
                     type: "confirm-warning",
                 }).then(function (result) {
                     webix.ajax().headers({ "Content-type": "application/json" })
-                    .del('/api/query/' + context.id)
-                    .then(function () {
-                        $$("tabs").removeOption(context.id);
-                        $$("list1").remove(context.id);
-                    });
+                        .del('/api/query/' + context.id)
+                        .then(function () {
+                            $$("tabs").removeOption(context.id);
+                            $$("list1").remove(context.id);
+                        });
                 });
             }
         }
