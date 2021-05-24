@@ -140,6 +140,22 @@ function open_new_tab(id) {
     const item = $$('list1').getItem(id);
 
     if (!$$(item.id)) {
+        const args = [];
+
+        item.args.forEach(function (v, idx) {
+            const arg_type = _.isNumber(v) ? "Number" : (_.isBoolean(v) ? "Boolean" : "String");
+            const arg_value = _.toString(v);
+
+            args.push({
+                id: "arg" + idx + ":" + id,
+                cols: [
+                    { view: "text", placeholder: "Arg", id: "arg_value" + idx + ":" + item.id, css: 'json_viewer', on: ITEM_EVENTS, value: arg_value },
+                    { view: "combo", options: ["String", "Number", "Boolean"], value: arg_type, width: 100, id: "arg_type" + idx + ":" + item.id, on: ITEM_EVENTS },
+                    { view: "button", value: "Del", id: "delArg" + idx + ":" + item.id, width: 50, click: del_arg },
+                ]
+            });
+        });
+
         $$("views").addView({
             id: item.id,
             rows: [
@@ -174,7 +190,7 @@ function open_new_tab(id) {
                                 },
                                 {
                                     id: "args:" + item.id,
-                                    rows: [],
+                                    rows: args,
                                 },
                             ],
                         },
