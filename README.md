@@ -1,6 +1,6 @@
 # Architecture
 tnt-postman is written as a web application in LUA, using webix for the client side processing and UI. On the server side, Tarantool is being utilised.
-![Screenshot 2021-05-20 at 09 14 52](https://user-images.githubusercontent.com/9526468/118928585-1a032980-b94c-11eb-8276-dad56c84ff9c.png)
+![Screenshot 2021-05-25 at 09 54 54](https://user-images.githubusercontent.com/9526468/119452835-7b0d7180-bd3f-11eb-9f5f-05d8907794a5.png)
 # How to use Docker image
 In order to run a container with our image, execute:
 
