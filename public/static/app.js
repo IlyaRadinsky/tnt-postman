@@ -170,9 +170,11 @@ function export_query(buttonId) {
                 {
                     cols: [
                         {},
-                        { view: "button", value: "Close", width: 100, click: function () {
-                            this.getTopParentView().hide();
-                        }}
+                        {
+                            view: "button", value: "Close", width: 100, click: function () {
+                                this.getTopParentView().hide();
+                            }
+                        }
                     ]
                 }
             ]
@@ -194,18 +196,22 @@ function import_query() {
                 {
                     cols: [
                         {},
-                        { view: "button", value: "Import", width: 100, click: function () {
-                            try {
-                                const item = JSON.parse($$("import_json").getValue());
-                                add_new_query(item, true);
-                                this.getTopParentView().hide();
-                            } catch (e) {
-                                webix.message(e.message, "error");
+                        {
+                            view: "button", value: "Import", width: 100, click: function () {
+                                try {
+                                    const item = JSON.parse($$("import_json").getValue());
+                                    add_new_query(item, true);
+                                    this.getTopParentView().hide();
+                                } catch (e) {
+                                    webix.message(e.message, "error");
+                                }
                             }
-                        }},
-                        { view: "button", value: "Close", width: 100, click: function () {
-                            this.getTopParentView().hide();
-                        }}
+                        },
+                        {
+                            view: "button", value: "Close", width: 100, click: function () {
+                                this.getTopParentView().hide();
+                            }
+                        }
                     ]
                 }
             ]
@@ -333,8 +339,9 @@ webix.ui({
         {
             cols: [
                 {
-                    view: "list", id: "list1",
-                    template: "<strong>#type#</strong> #title#",
+                    view: "tree", id: "list1",
+                    type: "lineTree",
+                    template: "{common.icon()}&nbsp;<strong>#type#</strong> #title#",
                     width: 250,
                     url: '/api/query',
                     select: true,
