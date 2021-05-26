@@ -250,6 +250,10 @@ function add_new_query(src, do_import) {
 function open_new_tab(id) {
     const item = $$('list1').getItem(id);
 
+    if (item.type === "Folder") {
+        return;
+    }
+
     if (!$$(item.id)) {
         $$("views").addView({
             id: item.id,
@@ -343,9 +347,9 @@ webix.ui({
                         {
                             cols: [
                                 {},
-                                { view: "icon", icon: "wxi-plus", tooltip: "New Folder", click: function() {} },
-                                { view: "icon", icon: "wxi-minus", tooltip: "Delete Selection", click: function() {} },
-                                { view: "icon", icon: "mdi mdi-content-copy", tooltip: "Duplicate", click: function() {} },
+                                { view: "icon", icon: "wxi-plus", tooltip: "New Folder", click: function () { } },
+                                { view: "icon", icon: "wxi-minus", tooltip: "Delete Selection", click: function () { } },
+                                { view: "icon", icon: "mdi mdi-content-copy", tooltip: "Duplicate", click: function () { } },
                             ]
                         },
                         {
@@ -353,12 +357,29 @@ webix.ui({
                             type: "lineTree",
                             template: "{common.icon()}&nbsp;<strong>#type#</strong> #title#",
                             width: 250,
-                            url: '/api/query',
                             select: true,
                             on: {
-                                onAfterSelect: open_new_tab
+                                onAfterSelect: open_new_tab,
                             },
                             onContext: {},
+                            url: {
+                                $proxy: true,
+                                load: function (view, params) {
+                                    return webix.ajax("/api/query")
+                                        .then(function (res) {
+                                            const data = res.json();
+                                            return [
+                                                {
+                                                    id: "root",
+                                                    title: "Queries",
+                                                    type: "Folder",
+                                                    open: true,
+                                                    data,
+                                                },
+                                            ];
+                                        });
+                                },
+                            }
                         },
                     ],
                 },
