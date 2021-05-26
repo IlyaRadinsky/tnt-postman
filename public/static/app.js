@@ -355,7 +355,12 @@ webix.ui({
                         {
                             view: "tree", id: "list1",
                             type: "lineTree",
-                            template: "{common.icon()}&nbsp;<strong>#type#</strong> #title#",
+                            template: function(obj, com) {
+                                if (obj.type === "Folder") {
+                                    return com.folder(obj, com) + obj.title;
+                                }
+                                return com.icon(obj, com) + "&nbsp;<strong>" + obj.type + "</strong>&nbsp;" + obj.title;
+                            },
                             width: 250,
                             select: true,
                             on: {
