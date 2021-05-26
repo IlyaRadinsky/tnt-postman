@@ -339,16 +339,28 @@ webix.ui({
         {
             cols: [
                 {
-                    view: "tree", id: "list1",
-                    type: "lineTree",
-                    template: "{common.icon()}&nbsp;<strong>#type#</strong> #title#",
-                    width: 250,
-                    url: '/api/query',
-                    select: true,
-                    on: {
-                        onAfterSelect: open_new_tab
-                    },
-                    onContext: {},
+                    rows: [
+                        {
+                            cols: [
+                                {},
+                                { view: "icon", icon: "wxi-plus", tooltip: "New Folder", click: function() {} },
+                                { view: "icon", icon: "wxi-minus", tooltip: "Delete Selection", click: function() {} },
+                                { view: "icon", icon: "mdi mdi-content-copy", tooltip: "Duplicate", click: function() {} },
+                            ]
+                        },
+                        {
+                            view: "tree", id: "list1",
+                            type: "lineTree",
+                            template: "{common.icon()}&nbsp;<strong>#type#</strong> #title#",
+                            width: 250,
+                            url: '/api/query',
+                            select: true,
+                            on: {
+                                onAfterSelect: open_new_tab
+                            },
+                            onContext: {},
+                        },
+                    ],
                 },
                 { view: "resizer" },
                 {
