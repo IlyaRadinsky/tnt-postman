@@ -328,7 +328,7 @@ function on_delete_tab(id) {
     $$("list1").unselect(id);
 }
 
-function new_collection(){
+function new_collection() {
     const selectedItem = $$("list1").getSelectedItem();
     const id = '' + webix.uid();
 
@@ -367,16 +367,26 @@ webix.ui({
                         {
                             view: "tree", id: "list1",
                             type: "lineTree",
-                            template: function(obj, com) {
+                            template: function (obj, com) {
                                 if (obj.type === "Collection") {
                                     return com.icon(obj, com) + obj.title;
                                 }
                                 return com.icon(obj, com) + "&nbsp;<strong>" + obj.type + "</strong>&nbsp;" + obj.title;
                             },
                             width: 250,
+                            drag: true,
                             select: true,
                             on: {
                                 onAfterSelect: open_new_tab,
+                                onBeforeDrop: function (context, ev) {
+                                    if (this.getItem(context.target).type === "Collection"){
+                                        context.parent = context.target;
+                                        context.index = 0;
+                                        this.getItem(context.target).open = true;
+                                    } else {
+                                        return false;
+                                    }
+                                },
                             },
                             onContext: {},
                             url: {
