@@ -250,7 +250,7 @@ function add_new_query(src, do_import) {
 function open_new_tab(id) {
     const item = $$('list1').getItem(id);
 
-    if (item.type === "Folder") {
+    if (item.type === "Collection") {
         return;
     }
 
@@ -328,6 +328,18 @@ function on_delete_tab(id) {
     $$("list1").unselect(id);
 }
 
+function new_collection(){
+    const selectedItem = $$("list1").getSelectedItem();
+    const id = '' + webix.uid();
+
+    $$("list1").add({
+        id,
+        type: "Collection",
+        title: "New Collection",
+        data: []
+    }, 0, (selectedItem && selectedItem.parent_id) || "root");
+}
+
 webix.ui({
     rows: [
         {
@@ -347,7 +359,7 @@ webix.ui({
                         {
                             cols: [
                                 {},
-                                { view: "icon", icon: "wxi-plus", tooltip: "New Folder", click: function () { } },
+                                { view: "icon", icon: "wxi-plus", tooltip: "New Collection", click: new_collection },
                                 { view: "icon", icon: "wxi-minus", tooltip: "Delete Selection", click: function () { } },
                                 { view: "icon", icon: "mdi mdi-content-copy", tooltip: "Duplicate", click: function () { } },
                             ]
@@ -356,8 +368,8 @@ webix.ui({
                             view: "tree", id: "list1",
                             type: "lineTree",
                             template: function(obj, com) {
-                                if (obj.type === "Folder") {
-                                    return com.folder(obj, com) + obj.title;
+                                if (obj.type === "Collection") {
+                                    return com.icon(obj, com) + obj.title;
                                 }
                                 return com.icon(obj, com) + "&nbsp;<strong>" + obj.type + "</strong>&nbsp;" + obj.title;
                             },
@@ -376,8 +388,8 @@ webix.ui({
                                             return [
                                                 {
                                                     id: "root",
-                                                    title: "Queries",
-                                                    type: "Folder",
+                                                    title: "Collections",
+                                                    type: "Collection",
                                                     open: true,
                                                     data,
                                                 },
