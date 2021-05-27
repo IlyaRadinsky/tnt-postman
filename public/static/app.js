@@ -392,7 +392,7 @@ webix.ui({
                             on: {
                                 onAfterSelect: open_new_tab,
                                 onBeforeDrop: function (context, ev) {
-                                    if (this.getItem(context.target).type === "Collection"){
+                                    if (this.getItem(context.target).type === "Collection") {
                                         context.parent = context.target;
                                         context.index = 0;
                                         this.getItem(context.target).open = true;
@@ -401,7 +401,9 @@ webix.ui({
                                     }
                                 },
                                 onAfterDrop: function (context, ev) {
-                                    // TODO: save the source's parent_id here (target)
+                                    const item = this.getItem(context.source);
+                                    item.parent_id = context.target === "root" ? null : context.target;
+                                    save("save:" + context.source);
                                 },
                             },
                             onContext: {},
