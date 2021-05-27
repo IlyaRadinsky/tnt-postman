@@ -138,6 +138,8 @@ function save(buttonId) {
 
     prepare_args(item);
 
+    item.parent_id = item.parent_id === "root" ? null : item.parent_id;
+
     webix.ajax().headers({ "Content-type": "application/json" })
         .put('/api/query/' + id, item)
         .catch(function (ret) {
@@ -353,6 +355,10 @@ function new_collection() {
         });
 }
 
+webix.protoUI({
+    name: "edittree",
+}, webix.EditAbility, webix.ui.tree);
+
 webix.ui({
     rows: [
         {
@@ -378,7 +384,7 @@ webix.ui({
                             ]
                         },
                         {
-                            view: "tree", id: "list1",
+                            view: "edittree", id: "list1",
                             type: "lineTree",
                             template: function (obj, com) {
                                 if (obj.type === "Collection") {
@@ -389,8 +395,20 @@ webix.ui({
                             width: 250,
                             drag: true,
                             select: true,
+                            editable: true,
+                            editor: "text",
+                            editValue: "title",
+                            editaction: "dblclick",
                             on: {
                                 onAfterSelect: open_new_tab,
+                                onBeforeEditStart: function (id) {
+                                    return id !== "root" && this.getItem(id).type === "Collection";
+                                },
+                                onEditorChange: function (id, value) {
+                                    const item = this.getItem(id);
+                                    item.title = value;
+                                    save("save:" + id);
+                                },
                                 onBeforeDrop: function (context, ev) {
                                     if (this.getItem(context.target).type === "Collection") {
                                         context.parent = context.target;
