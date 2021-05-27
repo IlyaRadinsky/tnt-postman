@@ -331,13 +331,26 @@ function on_delete_tab(id) {
 function new_collection() {
     const selectedItem = $$("list1").getSelectedItem();
     const id = '' + webix.uid();
+    const parent_id = (selectedItem && selectedItem.parent_id) || null;
 
-    $$("list1").add({
+    const item = {
         id,
+        parent_id,
         type: "Collection",
         title: "New Collection",
-        data: []
-    }, 0, (selectedItem && selectedItem.parent_id) || "root");
+        data: [],
+        flags: 0,
+    };
+
+    webix.ajax().headers({ "Content-type": "application/json" })
+        .put('/api/query/' + id, item)
+        .then(function (ret) {
+            $$("list1").add(item, 0, parent_id || "root");
+        })
+        .catch(function (ret) {
+            const data = ret.json();
+            webix.message(data.error, "error");
+        });
 }
 
 webix.ui({
@@ -386,6 +399,9 @@ webix.ui({
                                     } else {
                                         return false;
                                     }
+                                },
+                                onAfterDrop: function (context, ev) {
+                                    // TODO: save the source's parent_id here (target)
                                 },
                             },
                             onContext: {},
