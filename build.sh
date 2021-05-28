@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export RELEASE_VERSION=0.3
+export RELEASE_VERSION=0.4
 
 docker build \
     --build-arg RELEASE_VERSION=${RELEASE_VERSION} \

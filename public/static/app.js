@@ -138,6 +138,8 @@ function save(buttonId) {
 
     prepare_args(item);
 
+    item.parent_id = item.parent_id === "root" ? null : item.parent_id;
+
     webix.ajax().headers({ "Content-type": "application/json" })
         .put('/api/query/' + id, item)
         .catch(function (ret) {
@@ -170,9 +172,11 @@ function export_query(buttonId) {
                 {
                     cols: [
                         {},
-                        { view: "button", value: "Close", width: 100, click: function () {
-                            this.getTopParentView().hide();
-                        }}
+                        {
+                            view: "button", value: "Close", width: 100, click: function () {
+                                this.getTopParentView().hide();
+                            }
+                        }
                     ]
                 }
             ]
@@ -194,18 +198,22 @@ function import_query() {
                 {
                     cols: [
                         {},
-                        { view: "button", value: "Import", width: 100, click: function () {
-                            try {
-                                const item = JSON.parse($$("import_json").getValue());
-                                add_new_query(item, true);
-                                this.getTopParentView().hide();
-                            } catch (e) {
-                                webix.message(e.message, "error");
+                        {
+                            view: "button", value: "Import", width: 100, click: function () {
+                                try {
+                                    const item = JSON.parse($$("import_json").getValue());
+                                    add_new_query(item, true);
+                                    this.getTopParentView().hide();
+                                } catch (e) {
+                                    webix.message(e.message, "error");
+                                }
                             }
-                        }},
-                        { view: "button", value: "Close", width: 100, click: function () {
-                            this.getTopParentView().hide();
-                        }}
+                        },
+                        {
+                            view: "button", value: "Close", width: 100, click: function () {
+                                this.getTopParentView().hide();
+                            }
+                        }
                     ]
                 }
             ]
@@ -213,8 +221,9 @@ function import_query() {
     }).show();
 }
 
-function add_new_query(src, do_import) {
+function add_new_query(src = {}, do_import = false) {
     const id = '' + webix.uid();
+    const parent_id = src.parent_id || "root";
     let new_item = {};
 
     if (do_import) {
@@ -224,6 +233,7 @@ function add_new_query(src, do_import) {
     } else {
         _.assign(new_item, {
             id,
+            parent_id,
             title: src.title ? src.title + ' Copy' : "localhost:3301",
             host: src.host || "localhost",
             port: src.port || 3301,
@@ -231,18 +241,49 @@ function add_new_query(src, do_import) {
             user: src.user || "",
             password: src.password || "",
             query: src.query || "return box.info",
-            parent_id: src.parent_id,
             flags: src.flags || 0,
             args: src.args || [],
         });
     }
 
-    $$("list1").add(new_item, 0);
+    $$("list1").add(new_item, 0, parent_id);
     $$("list1").select(id);
+    save("save:" + new_item.id);
+}
+
+function del_query(item) {
+    const is_collection = item.type === "Collection";
+    let text = "Are you sure to delete<br />" + item.type + " <strong>" + item.title + "</strong>";
+    let body = null;
+
+    if (is_collection) {
+        text += "<br />with all nested elements";
+        body = { ids: [] };
+        $$("list1").data.eachSubItem(item.id, function(v) {
+            body.ids.push(v.id);
+        });
+    }
+
+    webix.confirm({
+        text: text + "?",
+        type: "confirm-warning",
+    }).then(function (result) {
+        webix.ajax().headers({ "Content-type": "application/json" })
+            .del('/api/query/' + item.id, body)
+            .then(function () {
+                $$("tabs").removeOption(item.id);
+                $$("list1").remove(item.id);
+                $$("list1").refresh();
+            });
+    });
 }
 
 function open_new_tab(id) {
     const item = $$('list1').getItem(id);
+
+    if (item.type === "Collection") {
+        return;
+    }
 
     if (!$$(item.id)) {
         $$("views").addView({
@@ -318,6 +359,35 @@ function on_delete_tab(id) {
     $$("list1").unselect(id);
 }
 
+function new_collection() {
+    const selectedItem = $$("list1").getSelectedItem();
+    const id = '' + webix.uid();
+    const parent_id = (selectedItem && selectedItem.parent_id) || null;
+
+    const item = {
+        id,
+        parent_id,
+        type: "Collection",
+        title: "New Collection",
+        data: [],
+        flags: 0,
+    };
+
+    webix.ajax().headers({ "Content-type": "application/json" })
+        .put('/api/query/' + id, item)
+        .then(function (ret) {
+            $$("list1").add(item, 0, parent_id || "root");
+        })
+        .catch(function (ret) {
+            const data = ret.json();
+            webix.message(data.error, "error");
+        });
+}
+
+webix.protoUI({
+    name: "edittree",
+}, webix.EditAbility, webix.ui.tree);
+
 webix.ui({
     rows: [
         {
@@ -327,21 +397,102 @@ webix.ui({
                 { view: "label", label: "TNT Postman", width: 100 },
                 { view: "button", label: "Import Query", width: 100, click: import_query },
                 {},
-                { view: "button", label: "New Query", width: 100, click: add_new_query },
+                { view: "button", label: "New Query", width: 100, click: function () { add_new_query() } },
             ],
         },
         {
             cols: [
                 {
-                    view: "list", id: "list1",
-                    template: "<strong>#type#</strong> #title#",
-                    width: 250,
-                    url: '/api/query',
-                    select: true,
-                    on: {
-                        onAfterSelect: open_new_tab
-                    },
-                    onContext: {},
+                    rows: [
+                        {
+                            cols: [
+                                {},
+                                { view: "icon", icon: "wxi-plus", tooltip: "New Collection", click: new_collection },
+                                { view: "icon", icon: "wxi-minus", tooltip: "Delete Selection", click: function () {
+                                    const item = $$("list1").getSelectedItem();
+                                    if (item) {
+                                        del_query(item);
+                                    }
+                                } },
+                                { view: "icon", icon: "mdi mdi-content-copy", tooltip: "Duplicate", click: function () {
+                                    const item = $$("list1").getSelectedItem();
+                                    if (item) {
+                                        add_new_query(item);
+                                    }
+                                } },
+                            ]
+                        },
+                        {
+                            view: "edittree", id: "list1",
+                            type: "lineTree",
+                            template: function (obj, com) {
+                                if (obj.type === "Collection") {
+                                    return com.icon(obj, com) + obj.title;
+                                }
+                                return com.icon(obj, com) + "&nbsp;<strong>" + obj.type + "</strong>&nbsp;" + obj.title;
+                            },
+                            width: 250,
+                            drag: true,
+                            select: true,
+                            editable: true,
+                            editor: "text",
+                            editValue: "title",
+                            editaction: "dblclick",
+                            on: {
+                                onAfterSelect: open_new_tab,
+                                onBeforeEditStart: function (id) {
+                                    return id !== "root" && this.getItem(id).type === "Collection";
+                                },
+                                onEditorChange: function (id, value) {
+                                    const item = this.getItem(id);
+                                    item.title = value;
+                                    save("save:" + id);
+                                },
+                                onBeforeDrop: function (context, ev) {
+                                    if (this.getItem(context.target).type === "Collection") {
+                                        context.parent = context.target;
+                                        context.index = 0;
+                                        this.getItem(context.target).open = true;
+                                    } else {
+                                        return false;
+                                    }
+                                },
+                                onAfterDrop: function (context, ev) {
+                                    const item = this.getItem(context.source);
+                                    item.parent_id = context.target === "root" ? null : context.target;
+                                    save("save:" + context.source);
+                                },
+                            },
+                            onContext: {},
+                            url: {
+                                $proxy: true,
+                                load: function (view, params) {
+                                    return webix.ajax("/api/query")
+                                        .then(function (res) {
+                                            const data = res.json();
+                                            const original_data = _.clone(data);
+                                            const groped_data = _.groupBy(data, "parent_id");
+
+                                            _.forEach(groped_data, function (v, id) {
+                                                const item = _.find(original_data, { id });
+                                                if (item) {
+                                                    item.data = v;
+                                                    _.remove(data, { parent_id: id });
+                                                }
+                                            });
+
+                                            return [{
+                                                id: "root",
+                                                title: "Collections",
+                                                type: "Collection",
+                                                open: true,
+                                                data,
+                                            }];
+                                        });
+                                },
+                            }
+                        },
+                    ],
                 },
                 { view: "resizer" },
                 {
@@ -383,17 +534,7 @@ webix.ui({
             if (id === "Duplicate") {
                 add_new_query(item);
             } else if (id === "Delete") {
-                webix.confirm({
-                    text: "Are you sure to delete<br />" + item.type + " <strong>" + item.title + "</strong>?",
-                    type: "confirm-warning",
-                }).then(function (result) {
-                    webix.ajax().headers({ "Content-type": "application/json" })
-                        .del('/api/query/' + context.id)
-                        .then(function () {
-                            $$("tabs").removeOption(context.id);
-                            $$("list1").remove(context.id);
-                        });
-                });
+                del_query(item);
             }
         }
     }

@@ -6,6 +6,7 @@ local fio = require('fio')
 local json = require('json')
 local checks = require('checks')
 local utils = require('utils')
+local log = require('log')
 local api = require('api').new()
 
 local WORKDIR = fio.abspath(fio.dirname(arg[0]))
@@ -67,10 +68,6 @@ local function on_post_query(req)
         password = nil
     end
 
-    if not utils.not_empty_string(host) then
-        return json_response(400, { error = 'Invalid host' })
-    end
-
     if not utils.not_empty_string(query) then
         if type == 'Eval' then
             return json_response(400, { error = 'Invalid query' })
@@ -119,28 +116,35 @@ local function on_put_query(req)
         return json_response(400, { error = 'Invalid query ID' })
     end
 
-    if not utils.not_empty_string(host) then
-        return json_response(400, { error = 'Invalid host' })
-    end
+    if type == "Collection" then
+        if not utils.not_empty_string(title) then
+            return json_response(400, { error = 'Invalid title' })
+        end
 
-    if not utils.positive_number(port) then
-        return json_response(400, { error = 'Invalid port' })
-    end
+        query = ""
+        host = ""
+        port = 0
+        args = {}
+    else
+        if not utils.not_empty_string(host) then
+            return json_response(400, { error = 'Invalid host' })
+        end
 
-    if not utils.not_empty_string(user) or not utils.not_empty_string(password) then
-        user = nil
-        password = nil
-    end
+        if not utils.positive_number(port) then
+            return json_response(400, { error = 'Invalid port' })
+        end
 
-    if not utils.not_empty_string(host) then
-        return json_response(400, { error = 'Invalid host' })
-    end
+        if not utils.not_empty_string(user) or not utils.not_empty_string(password) then
+            user = nil
+            password = nil
+        end
 
-    if not utils.not_empty_string(query) then
-        if type == 'Eval' then
-            return json_response(400, { error = 'Invalid query' })
-        elseif type == 'Call' then
-            return json_response(400, { error = 'Invalid call' })
+        if not utils.not_empty_string(query) then
+            if type == 'Eval' then
+                return json_response(400, { error = 'Invalid query' })
+            elseif type == 'Call' then
+                return json_response(400, { error = 'Invalid call' })
+            end
         end
     end
 
@@ -163,7 +167,14 @@ end
 
 local function on_delete_query(req)
     local id = req:stash('id')
+    local ids = req:post_param('ids')
+
     api.delete_query(id)
+
+    for _, i in pairs(ids) do
+        api.delete_query(i)
+    end
+
     return json_response(200, {})
 end
 
