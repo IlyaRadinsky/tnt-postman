@@ -251,6 +251,33 @@ function add_new_query(src = {}, do_import = false) {
     save("save:" + new_item.id);
 }
 
+function del_query(item) {
+    const is_collection = item.type === "Collection";
+    let text = "Are you sure to delete<br />" + item.type + " <strong>" + item.title + "</strong>";
+    let body = null;
+
+    if (is_collection) {
+        text += "<br />with all nested elements";
+        body = { ids: [] };
+        $$("list1").data.eachSubItem(item.id, function(v) {
+            body.ids.push(v.id);
+        });
+    }
+
+    webix.confirm({
+        text: text + "?",
+        type: "confirm-warning",
+    }).then(function (result) {
+        webix.ajax().headers({ "Content-type": "application/json" })
+            .del('/api/query/' + item.id, body)
+            .then(function () {
+                $$("tabs").removeOption(item.id);
+                $$("list1").remove(item.id);
+                $$("list1").refresh();
+            });
+    });
+}
+
 function open_new_tab(id) {
     const item = $$('list1').getItem(id);
 
@@ -381,8 +408,18 @@ webix.ui({
                             cols: [
                                 {},
                                 { view: "icon", icon: "wxi-plus", tooltip: "New Collection", click: new_collection },
-                                { view: "icon", icon: "wxi-minus", tooltip: "Delete Selection", click: function () { } },
-                                { view: "icon", icon: "mdi mdi-content-copy", tooltip: "Duplicate", click: function () { } },
+                                { view: "icon", icon: "wxi-minus", tooltip: "Delete Selection", click: function () {
+                                    const item = $$("list1").getSelectedItem();
+                                    if (item) {
+                                        del_query(item);
+                                    }
+                                } },
+                                { view: "icon", icon: "mdi mdi-content-copy", tooltip: "Duplicate", click: function () {
+                                    const item = $$("list1").getSelectedItem();
+                                    if (item) {
+                                        add_new_query(item);
+                                    }
+                                } },
                             ]
                         },
                         {
@@ -497,29 +534,7 @@ webix.ui({
             if (id === "Duplicate") {
                 add_new_query(item);
             } else if (id === "Delete") {
-                const is_collection = item.type === "Collection";
-                let text = "Are you sure to delete<br />" + item.type + " <strong>" + item.title + "</strong>";
-                let body = null;
-
-                if (is_collection) {
-                    text += "<br />with all nested elements";
-                    body = { ids: [] };
-                    context.obj.data.eachSubItem(context.id, function(v) {
-                        body.ids.push(v.id);
-                    });
-                }
-
-                webix.confirm({
-                    text: text + "?",
-                    type: "confirm-warning",
-                }).then(function (result) {
-                    webix.ajax().headers({ "Content-type": "application/json" })
-                        .del('/api/query/' + context.id, body)
-                        .then(function () {
-                            $$("tabs").removeOption(context.id);
-                            $$("list1").remove(context.id);
-                        });
-                });
+                del_query(item);
             }
         }
     }
