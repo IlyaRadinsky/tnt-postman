@@ -494,12 +494,21 @@ webix.ui({
             if (id === "Duplicate") {
                 add_new_query(item);
             } else if (id === "Delete") {
+                const is_collection = item.type === "Collection";
+                let text = "Are you sure to delete<br />" + item.type + " <strong>" + item.title + "</strong>";
+                let body = null;
+
+                if (is_collection) {
+                    text += "<br />with all nested elements";
+                    body = _.flatMapDeep(item.data, function(v) { return v.data });
+                }
+
                 webix.confirm({
-                    text: "Are you sure to delete<br />" + item.type + " <strong>" + item.title + "</strong>?",
+                    text: text + "?",
                     type: "confirm-warning",
                 }).then(function (result) {
                     webix.ajax().headers({ "Content-type": "application/json" })
-                        .del('/api/query/' + context.id)
+                        .del('/api/query/' + context.id, body)
                         .then(function () {
                             $$("tabs").removeOption(context.id);
                             $$("list1").remove(context.id);
