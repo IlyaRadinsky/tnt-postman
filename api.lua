@@ -69,6 +69,10 @@ function export.new()
 
         connection:close()
 
+        if type(ret) ~= 'table' then
+            ret = { ret }
+        end
+
         return true, ret
     end
 
