@@ -221,8 +221,9 @@ function import_query() {
     }).show();
 }
 
-function add_new_query(src, do_import) {
+function add_new_query(src = {}, do_import = false) {
     const id = '' + webix.uid();
+    const parent_id = src.parent_id || "root";
     let new_item = {};
 
     if (do_import) {
@@ -232,6 +233,7 @@ function add_new_query(src, do_import) {
     } else {
         _.assign(new_item, {
             id,
+            parent_id,
             title: src.title ? src.title + ' Copy' : "localhost:3301",
             host: src.host || "localhost",
             port: src.port || 3301,
@@ -239,14 +241,14 @@ function add_new_query(src, do_import) {
             user: src.user || "",
             password: src.password || "",
             query: src.query || "return box.info",
-            parent_id: src.parent_id,
             flags: src.flags || 0,
             args: src.args || [],
         });
     }
 
-    $$("list1").add(new_item, 0);
+    $$("list1").add(new_item, 0, parent_id);
     $$("list1").select(id);
+    save("save:" + new_item.id);
 }
 
 function open_new_tab(id) {
@@ -368,7 +370,7 @@ webix.ui({
                 { view: "label", label: "TNT Postman", width: 100 },
                 { view: "button", label: "Import Query", width: 100, click: import_query },
                 {},
-                { view: "button", label: "New Query", width: 100, click: add_new_query },
+                { view: "button", label: "New Query", width: 100, click: function () { add_new_query() } },
             ],
         },
         {
