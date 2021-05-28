@@ -431,10 +431,11 @@ webix.ui({
                                     return webix.ajax("/api/query")
                                         .then(function (res) {
                                             const data = res.json();
+                                            const original_data = _.clone(data);
                                             const groped_data = _.groupBy(data, "parent_id");
 
                                             _.forEach(groped_data, function (v, id) {
-                                                const item = _.find(data, { id });
+                                                const item = _.find(original_data, { id });
                                                 if (item) {
                                                     item.data = v;
                                                     _.remove(data, { parent_id: id });
