@@ -501,7 +501,10 @@ webix.ui({
 
                 if (is_collection) {
                     text += "<br />with all nested elements";
-                    body = _.flatMapDeep(item.data, function(v) { return v.data });
+                    body = { ids: [] };
+                    context.obj.data.eachSubItem(context.id, function(v) {
+                        body.ids.push(v.id);
+                    });
                 }
 
                 webix.confirm({

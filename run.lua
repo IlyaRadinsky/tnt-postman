@@ -6,6 +6,7 @@ local fio = require('fio')
 local json = require('json')
 local checks = require('checks')
 local utils = require('utils')
+local log = require('log')
 local api = require('api').new()
 
 local WORKDIR = fio.abspath(fio.dirname(arg[0]))
@@ -166,7 +167,14 @@ end
 
 local function on_delete_query(req)
     local id = req:stash('id')
+    local ids = req:post_param('ids')
+
     api.delete_query(id)
+
+    for _, i in pairs(ids) do
+        api.delete_query(i)
+    end
+
     return json_response(200, {})
 end
 
